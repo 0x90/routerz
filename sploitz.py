@@ -8,7 +8,7 @@ from pprint import pprint
 vendors = ['d-link', 'tp-link', 'zyxel', 'cisco', 'linksys', 'huawei']
 
 def search_sploitz(vendor):
-    lines = Popen('searchsploit %s' % vendor, shell=True).communicate()[0].split('\n')[2:-1]
+    lines = Popen('searchsploit %s' % vendor, shell=True, stdout=PIPE).communicate()[0].split('\n')[2:-1]
     # for line in lines:
     #     fpart = line.split(' /')[0]
     #     spart = line.replace(fpart, '')
