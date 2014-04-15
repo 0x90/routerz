@@ -1,28 +1,31 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-# Router vuln stat by searchsploit
+# Router vulnerability stat with help of searchsploit
+# Tested on Kali Linux 1.06
+# Author: @090h
 
 from subprocess import Popen, PIPE
-from pprint import pprint
 
-vendors = ['d-link', 'tp-link', 'zyxel', 'cisco', 'linksys', 'huawei']
+vendors = ['d-link', 'tp-link', 'zyxel', 'cisco', 'linksys', 'huawei', 'netgear']
+stat = {}
 
 def search_sploitz(vendor):
-    lines = Popen('searchsploit %s' % vendor, shell=True, stdout=PIPE).communicate()[0].split('\n')[2:-1]
-    # for line in lines:
-    #     fpart = line.split(' /')[0]
-    #     spart = line.replace(fpart, '')
-    return lines
-
+    out = Popen('searchsploit %s' % vendor, shell=True, stdout=PIPE).communicate()[0]
+    if out is None:
+        return None
+    return out.split('\n')[2:-1]
 
 def sploit_code(short_path):
-    sploit_path = '/usr/share/exploitdb/platforms/%s' % short_path
-    return open(sploit_path, 'rb').read()
+    return open('/usr/share/exploitdb/platforms/%s' % short_path, 'rb').read()
 
-#def sploit_stat()
+# Get exploit DB stat
+for vendor in vendors:
+    lines = search_sploitz(vendor)
+    if lines is not None:
+        stat[vendor] = len(lines)
 
-if __name__ == '__main__':
-    for vendor in vendors:
-        print('Vendor: %s' % vendor)
-        pprint(search_sploitz(vendor))
-        raw_input()
+
+print('ExploitDB statistics')
+for w in sorted(stat, key=stat.get, reverse=True):
+    print w, stat[w]
+

