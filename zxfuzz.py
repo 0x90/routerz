@@ -65,13 +65,15 @@ def main():
     parser = ArgumentParser(description='Dummy telnet fuzzer for ZyXELL Keenetic', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('host', help='Telnet host to fuzz')
     parser.add_argument('-p', '--port',  type=int, default=23, required=False, help='telnet port')
-    parser.add_argument('-t', '--threads', action='store', type=int, default=5, help='thread count')
+    #parser.add_argument('-t', '--threads', action='store', type=int, default=5, help='thread count')
     parser.add_argument('-l', '--length', action='store', type=int, default=0x40, help='length start')
+    parser.add_argument('-d', '--debug', action='store_true',help='debug output on')
     parser.add_argument('--version', action='version', version='%(prog)s 0.01')
     args = parser.parse_args()
     start_time = datetime.now()
 
-    ZyxellFuzzer(args.host, args.port).fuzz_bof(0, args.length)
+    zf = ZyxellFuzzer(args.host, args.port, args.debug)
+    zf.fuzz_bof(0, args.length)
 
     logging.debug("Start time: " + start_time.strftime('%Y-%m-%d %H:%M:%S'))
     logging.debug("Finish time: " + datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
