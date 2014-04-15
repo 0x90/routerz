@@ -70,8 +70,7 @@ def main():
     args = parser.parse_args()
     start_time = datetime.now()
 
-    zf = ZyxellFuzzer(args.host, args.port)
-    zf.fuzz_bof(0, args.length)
+    ZyxellFuzzer(args.host, args.port).fuzz_bof(0, args.length)
 
     logging.debug("Start time: " + start_time.strftime('%Y-%m-%d %H:%M:%S'))
     logging.debug("Finish time: " + datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
