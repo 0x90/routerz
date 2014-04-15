@@ -42,8 +42,8 @@ class ZyxellFuzzer(object):
             # Attempts limit == 3
             for x in xrange(0,3):
                 buf = 'A'*buflen
-                print("Trying length 0x%X" % len(buf))
-                print(tn.read_until('Password :'))
+                print("Trying length: %i 0x%X" % (len(buf), len(buf)))
+                logging.debug(tn.read_until('Password :'))
                 tn.write(buf+'\n')
                 buflen += 1
 
@@ -58,6 +58,7 @@ class ZyxellFuzzer(object):
             new_buf = buf + chr(x)
             tn.write(new_buf+'\n')
             print tn.read_until('Password :')
+            tn.read_until('Password :')
             tn.close()
 
 def main():
